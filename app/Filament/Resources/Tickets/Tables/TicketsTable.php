@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class TicketsTable
@@ -14,7 +15,29 @@ class TicketsTable
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('title')
+                    ->searchable(),
+                TextColumn::make('status.name')
+                    ->searchable(),
+                TextColumn::make('created_by')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('assigned_to')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('priority')
+                    ->badge(),
+                TextColumn::make('deadline')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Ticket extends Model
 {
+    use HasFactory, LogsActivity;
+
     protected $fillable = [
         'title',
         'description',
         'status_id',
+        'priority',
         'created_by',
         'assigned_to',
-        'priority',
         'deadline',
     ];
 
@@ -23,17 +27,26 @@ class Ticket extends Model
         'deadline' => 'datetime',
     ];
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    // ==================== Связи ====================
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class);
     }
 
-    public function creator(): BelongsTo
+    public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function assignedUser(): BelongsTo
+    public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
@@ -41,32 +54,5 @@ class Ticket extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
-    }
-
-    public function histories(): HasMany
-    {
-        return $this->hasMany(RequestHistory::class);
-    }
-    protected static function booted(): void
-    {
-        static::creating(function ($ticket) {
-            if (!$ticket->created_by) {
-                $ticket->created_by = Auth::id();
-            }
-        });
-
-        static::updated(function ($ticket) {
-
-            if ($ticket->isDirty('status_id')) {
-
-                $old = $ticket->getOriginal('status_id');
-                $new = $ticket->status_id;
-
-                $ticket->comments()->create([
-                    'user_id' => Auth::id(),
-                    'content' => "Status changed: {$old} → {$new}",
-                ]);
-            }
-        });
     }
 }

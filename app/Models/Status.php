@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Status extends Model
 {
     protected $fillable = [
-        'name',
-        'slug',
-        'color',
-        'sort_order',
+        'name', 'label', 'color', 'order', 'is_final', 'meta'
     ];
 
-    public function tickets(): HasMany
+    protected $casts = [
+        'is_final' => 'boolean',
+        'meta' => 'array',
+    ];
+
+    public function requests(): HasMany
     {
-        return $this->hasMany(Ticket::class);
+        return $this->hasMany(Request::class);
     }
 }
