@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Ticket extends Model
 {
@@ -45,5 +46,28 @@ class Ticket extends Model
     public function histories(): HasMany
     {
         return $this->hasMany(RequestHistory::class);
+    }
+    protected static function booted(): void
+    {
+        static::created(function ($ticket) {
+            $ticket->comments()->create([
+                'user_id' => Auth::id(),
+                'content' => 'Ticket created',
+            ]);
+        });
+
+        static::updated(function ($ticket) {
+
+            if ($ticket->isDirty('status_id')) {
+
+                $old = $ticket->getOriginal('status_id');
+                $new = $ticket->status_id;
+
+                $ticket->comments()->create([
+                    'user_id' => Auth::id(),
+                    'content' => "Status changed: {$old} → {$new}",
+                ]);
+            }
+        });
     }
 }
