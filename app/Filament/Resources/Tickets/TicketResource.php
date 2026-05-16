@@ -63,6 +63,7 @@ class TicketResource extends Resource
 
     public static function table(Table $table): Table
     {
+
         return TicketsTable::configure($table);
     }
 

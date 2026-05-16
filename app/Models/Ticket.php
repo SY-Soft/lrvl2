@@ -49,11 +49,10 @@ class Ticket extends Model
     }
     protected static function booted(): void
     {
-        static::created(function ($ticket) {
-            $ticket->comments()->create([
-                'user_id' => Auth::id(),
-                'content' => 'Ticket created',
-            ]);
+        static::creating(function ($ticket) {
+            if (!$ticket->created_by) {
+                $ticket->created_by = Auth::id();
+            }
         });
 
         static::updated(function ($ticket) {
