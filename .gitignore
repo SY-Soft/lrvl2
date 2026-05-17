@@ -1,7 +1,7 @@
 *.log
 .DS_Store
 .2del_SY
-.envexit
+.env
 .env.backup
 .env.production
 .phpactor.json

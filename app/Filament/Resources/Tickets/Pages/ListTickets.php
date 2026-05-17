@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Tickets\Pages1;
+namespace App\Filament\Resources\Tickets\Pages;
 
 use App\Filament\Resources\Tickets\TicketResource;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 
-class ViewTicket extends ViewRecord
+class ListTickets extends ListRecords
 {
     protected static string $resource = TicketResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Tickets\Pages1;
+namespace App\Filament\Resources\Tickets\Pages;
 
 use App\Filament\Resources\Tickets\TicketResource;
 use Filament\Resources\Pages\CreateRecord;

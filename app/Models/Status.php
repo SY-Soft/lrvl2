@@ -16,8 +16,8 @@ class Status extends Model
         'meta' => 'array',
     ];
 
-    public function requests(): HasMany
+    public function tickets(): HasMany
     {
-        return $this->hasMany(Request::class);
+        return $this->hasMany(Ticket::class);
     }
 }

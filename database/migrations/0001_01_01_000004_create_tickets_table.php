@@ -29,7 +29,7 @@ return new class extends Migration {
                 ->constrained('users')
                 ->nullOnDelete();
 
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
 
             $table->timestamp('deadline')->nullable();
 

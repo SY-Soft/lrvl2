@@ -45,7 +45,7 @@ class TicketResource extends Resource
                 Forms\Components\Select::make('status_id')
                     ->label('Статус')
                     ->relationship('status', 'label')
-                    ->required(),
+                    ->required()->preload(),
 
                 Forms\Components\Select::make('priority')
                     ->label('Приоритет')
@@ -95,7 +95,6 @@ class TicketResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->defaultSort('created_at', 'desc')
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -110,10 +109,10 @@ class TicketResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages1\ListTickets::route('/'),
-            'create' => Pages1\CreateTicket::route('/create'),
-            'view'   => Pages1\ViewTicket::route('/{record}'),
-            'edit'   => Pages1\EditTicket::route('/{record}/edit'),
+            'index'  => Pages\ListTickets::route('/'),
+            'create' => Pages\CreateTicket::route('/create'),
+            'view'   => Pages\ViewTicket::route('/{record}'),
+            'edit'   => Pages\EditTicket::route('/{record}/edit'),
         ];
     }
 }
