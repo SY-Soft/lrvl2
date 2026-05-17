@@ -2,29 +2,36 @@
 
 namespace App\Filament\Resources\Tickets;
 
-use App\Filament\Resources\Tickets\Pages;
 use App\Models\Ticket;
+use BackedEnum;                          // ← обязательно
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
-use BackedEnum;
+
+
 
 class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Ticket;
+    protected static BackedEnum|string|null $navigationIcon = Heroicon::Ticket;   // ← вот так
 
     protected static ?string $label = 'Заявка';
     protected static ?string $pluralLabel = 'Заявки';
     protected static ?string $recordTitleAttribute = 'title';
 
-    public static function form(Form $form): Form
+
+    public static function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->label('Заголовок')
@@ -88,13 +95,14 @@ class TicketResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                ActionGroup::make([
+                    DeleteBulkAction::make(),   // ← вот правильный
                 ]),
             ]);
     }
@@ -102,10 +110,10 @@ class TicketResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListTickets::route('/'),
-            'create' => Pages\CreateTicket::route('/create'),
-            'view'   => Pages\ViewTicket::route('/{record}'),
-            'edit'   => Pages\EditTicket::route('/{record}/edit'),
+            'index'  => Pages1\ListTickets::route('/'),
+            'create' => Pages1\CreateTicket::route('/create'),
+            'view'   => Pages1\ViewTicket::route('/{record}'),
+            'edit'   => Pages1\EditTicket::route('/{record}/edit'),
         ];
     }
 }

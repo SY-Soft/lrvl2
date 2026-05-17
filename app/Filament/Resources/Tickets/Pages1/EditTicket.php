@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Tickets\Pages;
+namespace App\Filament\Resources\Tickets\Pages1;
 
 use App\Filament\Resources\Tickets\TicketResource;
 use Filament\Actions\DeleteAction;
