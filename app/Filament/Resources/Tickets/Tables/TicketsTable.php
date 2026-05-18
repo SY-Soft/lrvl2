@@ -2,46 +2,89 @@
 
 namespace App\Filament\Resources\Tickets\Tables;
 
+use App\Models\Status;
+use App\Models\Ticket;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class TicketsTable
 {
+    private const PRIORITIES = [
+        'low' => 'Низкий',
+        'medium' => 'Средний',
+        'high' => 'Высокий',
+        'urgent' => 'Срочный',
+    ];
+
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->searchable(),
-                TextColumn::make('status.name')
-                    ->searchable(),
-                TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('assigned_to')
-                    ->numeric()
+                    ->label('Заголовок')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50),
+                TextColumn::make('status.label')
+                    ->label('Статус')
+                    ->badge()
+                    ->color(fn (Ticket $record) => $record->status?->color ?? 'gray')
                     ->sortable(),
                 TextColumn::make('priority')
-                    ->badge(),
+                    ->label('Приоритет')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => self::PRIORITIES[$state] ?? (string) $state)
+                    ->sortable(),
+                TextColumn::make('assignedTo.name')
+                    ->label('Исполнитель')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
                 TextColumn::make('deadline')
-                    ->dateTime()
+                    ->label('Дедлайн')
+                    ->dateTime('d.m.Y')
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Создано')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable(),
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Обновлено')
+                    ->dateTime('d.m.Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters(
+                [
+                    SelectFilter::make('status_id')
+                        ->label('Статус')
+                        ->options(fn (): array => Status::query()
+                            ->orderBy('order')
+                            ->pluck('label', 'id')
+                            ->all())
+                        ->multiple(),
+                    SelectFilter::make('priority')
+                        ->label('Приоритет')
+                        ->options(self::PRIORITIES)
+                        ->multiple(),
+                    SelectFilter::make('assigned_to')
+                        ->label('Исполнитель')
+                        ->relationship('assignedTo', 'name')
+                        ->searchable()
+                        ->multiple()
+                        ->preload(),
+                ],
+                layout: FiltersLayout::AboveContent,
+            )
+            ->filtersFormColumns(3)
+            ->deferFilters(false)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
