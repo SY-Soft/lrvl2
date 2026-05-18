@@ -79,6 +79,7 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label('Заголовок')
                     ->searchable()
                     ->sortable()
                     ->limit(50),
@@ -96,7 +97,8 @@ class TicketResource extends Resource
 
                 Tables\Columns\TextColumn::make('assignedTo.name')
                     ->label('Исполнитель')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('deadline')
                     ->label('Дедлайн')
@@ -113,16 +115,27 @@ class TicketResource extends Resource
                 Tables\Filters\SelectFilter::make('status_id')
                     ->label('Статус')
                     ->relationship('status', 'label')
-                    ->multiple(),
+                    ->multiple()
+                    ->preload(),
 
                 Tables\Filters\SelectFilter::make('priority')
                     ->label('Приоритет')
                     ->options([
-                        'low' => 'Низкий',
+                        'low'    => 'Низкий',
                         'medium' => 'Средний',
-                        'high' => 'Высокий',
+                        'high'   => 'Высокий',
                         'urgent' => 'Срочный',
-                    ]),
+                    ])
+                    ->multiple()
+                    ->preload(),
+
+                // ← Новый фильтр с автокомплитом
+                Tables\Filters\SelectFilter::make('assigned_to')
+                    ->label('Исполнитель')
+                    ->relationship('assignedTo', 'name')
+                    ->searchable()
+                    ->multiple()
+                    ->preload(),
             ])
             ->actions([
                 ViewAction::make(),
