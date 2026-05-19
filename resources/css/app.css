@@ -1,11 +1,211 @@
-@import 'tailwindcss';
+@import 'bootstrap/dist/css/bootstrap.min.css';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+:root {
+    --sy-ink: #17202a;
+    --sy-muted: #64748b;
+    --sy-line: #dbe3ee;
+    --sy-soft: #f5f8fb;
+    --sy-brand: #1769aa;
+    --sy-brand-dark: #0f4c7d;
+    --sy-accent: #18a999;
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+body {
+    min-height: 100vh;
+    color: var(--sy-ink);
+    background: var(--sy-soft);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+    text-decoration: none;
+}
+
+.site-header {
+    background: rgba(255, 255, 255, .95);
+    border-bottom: 1px solid var(--sy-line);
+    backdrop-filter: blur(12px);
+}
+
+.navbar {
+    min-height: 72px;
+}
+
+.brand-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--sy-brand), var(--sy-accent));
+    border-radius: 8px;
+    font-weight: 800;
+}
+
+.brand-text {
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.nav-link {
+    color: #334155;
+    font-weight: 650;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    color: var(--sy-brand);
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background: var(--sy-brand);
+    border-color: var(--sy-brand);
+}
+
+.btn-primary:hover {
+    background: var(--sy-brand-dark);
+    border-color: var(--sy-brand-dark);
+}
+
+.hero {
+    padding: 88px 0 76px;
+    color: #fff;
+    background:
+        linear-gradient(110deg, rgba(13, 38, 61, .94), rgba(18, 100, 148, .88)),
+        url("https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1800&q=80") center/cover;
+}
+
+.eyebrow {
+    margin-bottom: 12px;
+    color: #67e8d4;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    max-width: 780px;
+    margin: 0;
+    font-size: clamp(2.25rem, 5vw, 4.75rem);
+    line-height: 1.03;
+    font-weight: 850;
+    letter-spacing: 0;
+}
+
+.hero-copy {
+    max-width: 680px;
+    margin: 22px 0 30px;
+    color: rgba(255, 255, 255, .84);
+    font-size: 1.14rem;
+}
+
+.summary-panel,
+.feature-card,
+.step-card {
+    background: #fff;
+    border: 1px solid var(--sy-line);
+    border-radius: 8px;
+}
+
+.summary-panel {
+    padding: 22px;
+    color: var(--sy-ink);
+    box-shadow: 0 24px 70px rgba(13, 35, 55, .28);
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.summary-row:last-child {
+    border-bottom: 0;
+}
+
+.summary-row span,
+.feature-card p,
+.step-card p,
+.site-footer span {
+    color: var(--sy-muted);
+}
+
+.section {
+    padding: 58px 0;
+}
+
+.section-title {
+    margin-bottom: 24px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 820;
+}
+
+.feature-card,
+.step-card {
+    height: 100%;
+    padding: 22px;
+}
+
+.feature-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 18px;
+    color: var(--sy-brand);
+    background: #e8f3fb;
+    border-radius: 8px;
+    font-size: 1.25rem;
+}
+
+.step-number {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 16px;
+    color: #fff;
+    background: var(--sy-brand);
+    border-radius: 8px;
+    font-weight: 800;
+}
+
+.site-footer {
+    padding: 28px 0;
+    background: #fff;
+    border-top: 1px solid var(--sy-line);
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.footer-links a {
+    color: var(--sy-muted);
+    font-weight: 700;
+}
+
+.footer-links a:hover {
+    color: var(--sy-brand);
+}
+
+@media (max-width: 991.98px) {
+    .hero {
+        padding: 58px 0 46px;
+    }
 }

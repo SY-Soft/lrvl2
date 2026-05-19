@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Tickets\Tables;
 
 use App\Models\Status;
 use App\Models\Ticket;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,6 +25,16 @@ class TicketsTable
 
     public static function configure(Table $table): Table
     {
+        $statusOptions = Status::query()
+            ->orderBy('order')
+            ->pluck('label', 'id')
+            ->all();
+
+        $userOptions = User::query()
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+
         return $table
             ->columns([
                 TextColumn::make('title')
@@ -57,29 +68,23 @@ class TicketsTable
                 TextColumn::make('updated_at')
                     ->label('Обновлено')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters(
                 [
                     SelectFilter::make('status_id')
                         ->label('Статус')
-                        ->options(fn (): array => Status::query()
-                            ->orderBy('order')
-                            ->pluck('label', 'id')
-                            ->all())
-                        ->multiple(),
+                        ->options($statusOptions)
+                        ->native(),
                     SelectFilter::make('priority')
                         ->label('Приоритет')
                         ->options(self::PRIORITIES)
-                        ->multiple(),
+                        ->native(),
                     SelectFilter::make('assigned_to')
                         ->label('Исполнитель')
-                        ->relationship('assignedTo', 'name')
-                        ->searchable()
-                        ->multiple()
-                        ->preload(),
+                        ->options($userOptions)
+                        ->native(),
                 ],
                 layout: FiltersLayout::AboveContent,
             )
