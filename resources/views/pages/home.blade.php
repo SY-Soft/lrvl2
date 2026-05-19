@@ -8,8 +8,8 @@
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">
                     <div class="eyebrow">Service Desk</div>
-                    <h1>Портал заявок для команды, клиентов и аккуратного контроля работ.</h1>
-                    <p class="hero-copy">Чистый публичный интерфейс на Bootstrap, админка на Filament, Laravel-логика остается на месте и готова развиваться без хаоса в шаблонах.</p>
+                    <h1>Портал заявок для клиентов и команды поддержки.</h1>
+                    <p class="hero-copy">Публичная часть собирает обращения. Администрирование, статусы и работа с заявками остаются в Filament.</p>
                     <div class="d-flex flex-wrap gap-2">
                         <a class="btn btn-primary btn-lg" href="{{ url('/admin') }}">
                             <i class="bi bi-kanban"></i>
@@ -17,7 +17,7 @@
                         </a>
                         <a class="btn btn-light btn-lg" href="#process">
                             <i class="bi bi-arrow-down-circle"></i>
-                            Как работает
+                            Как устроено
                         </a>
                     </div>
                 </div>
@@ -32,12 +32,12 @@
                             <strong>Filament</strong>
                         </div>
                         <div class="summary-row">
-                            <span>Сущности</span>
+                            <span>Модели</span>
                             <strong>Tickets / Statuses</strong>
                         </div>
                         <div class="summary-row">
-                            <span>Деплой</span>
-                            <strong>Vite build</strong>
+                            <span>Сборка</span>
+                            <strong>Vite</strong>
                         </div>
                     </div>
                 </div>
@@ -49,28 +49,28 @@
         <div class="container">
             <div class="section-title">
                 <div class="eyebrow">Основа</div>
-                <h2>Каркас без лишнего шума</h2>
+                <h2>Структура фронта</h2>
             </div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <article class="feature-card">
                         <span class="feature-icon"><i class="bi bi-layout-text-window"></i></span>
-                        <h3>Header и footer</h3>
-                        <p>Общий Blade layout, частичные шаблоны и понятная навигация вместо огромного welcome-файла.</p>
+                        <h3>Общий layout</h3>
+                        <p>Базовый Blade-шаблон подключает стили, скрипты, header и footer.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="feature-card">
                         <span class="feature-icon"><i class="bi bi-bootstrap"></i></span>
-                        <h3>Bootstrap через Vite</h3>
-                        <p>Bootstrap и иконки установлены npm-пакетами, собираются вместе с фронтом и не зависят от CDN.</p>
+                        <h3>Bootstrap через npm</h3>
+                        <p>Bootstrap, Popper и иконки установлены пакетами и собираются через Vite.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="feature-card">
-                        <span class="feature-icon"><i class="bi bi-shield-check"></i></span>
-                        <h3>Готово к развитию</h3>
-                        <p>Можно добавлять публичные формы заявок, страницы статусов и клиентский кабинет поверх существующих моделей.</p>
+                        <span class="feature-icon"><i class="bi bi-shield-lock"></i></span>
+                        <h3>Админ-раздел</h3>
+                        <p>Ссылка на Filament остается в навигации, публичный интерфейс отделен от панели управления.</p>
                     </article>
                 </div>
             </div>
@@ -81,28 +81,28 @@
         <div class="container">
             <div class="section-title">
                 <div class="eyebrow">Процесс</div>
-                <h2>Как дальше наращивать</h2>
+                <h2>Базовая логика</h2>
             </div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <article class="step-card">
                         <span class="step-number">1</span>
                         <h3>Заявка</h3>
-                        <p>Публичная форма создает Ticket и привязывает автора.</p>
+                        <p>Публичная форма будет создавать Ticket и сохранять контакт автора.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="step-card">
                         <span class="step-number">2</span>
                         <h3>Обработка</h3>
-                        <p>Команда меняет статус, приоритет и исполнителя в Filament.</p>
+                        <p>Оператор меняет статус, приоритет и исполнителя в Filament.</p>
                     </article>
                 </div>
                 <div class="col-md-4">
                     <article class="step-card">
                         <span class="step-number">3</span>
                         <h3>Контроль</h3>
-                        <p>Клиент видит состояние работы, а история остается в системе.</p>
+                        <p>Статус заявки можно вывести в публичной части или в отдельном кабинете.</p>
                     </article>
                 </div>
             </div>
