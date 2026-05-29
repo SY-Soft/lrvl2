@@ -11,6 +11,15 @@
     @include('partials.header')
 
     <main>
+        @if (session('status'))
+            <div class="container pt-4">
+                <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
+                    <i class="bi bi-check-circle"></i>
+                    <div>{{ session('status') }}</div>
+                </div>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 

@@ -7,7 +7,7 @@
         <div class="footer-links">
             <a href="{{ route('home') }}">Главная</a>
             <a href="#process">Процесс</a>
-            <a href="{{ url('/admin') }}">Админ-панель</a>
+            <a href="{{ auth()->check() ? url('/admin') : route('login', ['intended' => url('/admin')]) }}">Админ-панель</a>
         </div>
     </div>
 </footer>

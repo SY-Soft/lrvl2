@@ -21,12 +21,38 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#features">Возможности</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-dark btn-sm px-3" href="{{ url('/admin') }}">
-                            <i class="bi bi-shield-lock"></i>
-                            Админ
-                        </a>
-                    </li>
+                    @auth
+                        <li class="nav-item">
+                            <a class="btn btn-outline-dark btn-sm px-3" href="{{ url('/admin') }}">
+                                <i class="bi bi-shield-lock"></i>
+                                Админ
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                {{ auth()->user()->name }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <form method="post" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button class="dropdown-item" type="submit">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Выйти
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="btn btn-outline-dark btn-sm px-3" href="{{ route('login', ['intended' => url('/admin')]) }}">
+                                <i class="bi bi-shield-lock"></i>
+                                Войти
+                            </a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
