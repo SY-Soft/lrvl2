@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\PortalAuthController;
 use Illuminate\Support\Facades\Route;
 
+
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [PortalAuthController::class, 'create'])->name('login');
     Route::post('/login', [PortalAuthController::class, 'store'])->name('login.store');

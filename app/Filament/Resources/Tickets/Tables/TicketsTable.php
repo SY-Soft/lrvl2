@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tickets\Tables;
 use App\Models\Status;
 use App\Models\Ticket;
 use App\Models\User;
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +26,10 @@ class TicketsTable
 
     public static function configure(Table $table): Table
     {
+        \Debugbar::info(self::PRIORITIES);
+        \Debugbar::error('Error!');
+        \Debugbar::warning('Watch out…');
+
         $statusOptions = Status::query()
             ->orderBy('order')
             ->pluck('label', 'id')
