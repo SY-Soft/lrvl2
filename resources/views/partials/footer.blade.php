@@ -6,8 +6,15 @@
         </div>
         <div class="footer-links">
             <a href="{{ route('home') }}">Главная</a>
-            <a href="#process">Процесс</a>
-            <a href="{{ auth()->check() ? url('/admin') : route('login', ['intended' => url('/admin')]) }}">Админ-панель</a>
+            @auth
+                <a href="{{ route('dashboard') }}">Кабинет</a>
+                @if (auth()->user()->isAdmin())
+                    <a href="{{ url('/admin') }}">Админ-панель</a>
+                @endif
+            @else
+                <a href="#process">Процесс</a>
+                <a href="{{ route('login') }}">Войти</a>
+            @endauth
         </div>
     </div>
 </footer>

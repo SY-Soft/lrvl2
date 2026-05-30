@@ -15,19 +15,27 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Главная</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#process">Процесс</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#features">Возможности</a>
-                    </li>
                     @auth
                         <li class="nav-item">
-                            <a class="btn btn-outline-dark btn-sm px-3" href="{{ url('/admin') }}">
-                                <i class="bi bi-shield-lock"></i>
-                                Админ
+                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Кабинет</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard.tickets.*') ? 'active' : '' }}" href="{{ route('dashboard.tickets.index') }}">Тикеты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm px-3" href="{{ route('dashboard.tickets.create') }}">
+                                <i class="bi bi-plus-lg"></i>
+                                Создать
                             </a>
                         </li>
+                        @if (auth()->user()->isAdmin())
+                            <li class="nav-item">
+                                <a class="btn btn-outline-dark btn-sm px-3" href="{{ url('/admin') }}">
+                                    <i class="bi bi-shield-lock"></i>
+                                    Админ
+                                </a>
+                            </li>
+                        @endif
                         <li class="nav-item dropdown">
                             <button class="btn btn-light btn-sm dropdown-toggle px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle"></i>
@@ -47,8 +55,14 @@
                         </li>
                     @else
                         <li class="nav-item">
-                            <a class="btn btn-outline-dark btn-sm px-3" href="{{ route('login', ['intended' => url('/admin')]) }}">
-                                <i class="bi bi-shield-lock"></i>
+                            <a class="nav-link" href="#process">Процесс</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#features">Возможности</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-dark btn-sm px-3" href="{{ route('login') }}">
+                                <i class="bi bi-box-arrow-in-right"></i>
                                 Войти
                             </a>
                         </li>

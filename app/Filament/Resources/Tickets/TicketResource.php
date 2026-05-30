@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Tickets;
 
 use App\Filament\Resources\Tickets\Pages;
+use App\Filament\Resources\Tickets\RelationManagers\CommentsRelationManager;
+use App\Filament\Resources\Tickets\RelationManagers\HistoriesRelationManager;
 use App\Filament\Resources\Tickets\Tables\TicketsTable;
 use App\Models\Ticket;
 use Filament\Forms;
@@ -77,6 +79,14 @@ class TicketResource extends Resource
     public static function table(Table $table): Table
     {
         return TicketsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CommentsRelationManager::class,
+            HistoriesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

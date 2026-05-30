@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ticket;
 use App\Models\Status;
+use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DevelController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $stats = [
             'users' => User::count(),
@@ -20,42 +22,52 @@ class DevelController extends Controller
         return view('devel.index', compact('stats'));
     }
 
-    public function generate(Request $request)
+    public function generate(Request $request): RedirectResponse
     {
         $request->validate([
-            'users_count' => 'required|integer|min:1|max:50',
+            'users_count' => ['required', 'integer', 'min:1', 'max:50'],
         ]);
 
-        // Создаём пользователей
-        $usersCount = $request->users_count;
+        $usersCount = (int) $request->integer('users_count');
+        $roles = ['user', 'support', 'manager'];
 
         for ($i = 1; $i <= $usersCount; $i++) {
-            User::create([
-                'name' => "Тестовый Юзер $i",
+            $role = $roles[($i - 1) % count($roles)];
+
+            User::updateOrCreate([
                 'email' => "test{$i}@example.com",
+            ], [
+                'name' => "Test {$role} {$i}",
                 'password' => bcrypt('password'),
-            ]);
+            ])->syncRoles([$role]);
         }
 
-        // Можно добавить создание тикетов и т.д.
         $this->generateTickets(20);
 
-        return redirect()->route('devel.index')
+        return redirect()
+            ->route('devel.index')
             ->with('success', "Создано {$usersCount} пользователей + тестовые тикеты");
     }
 
-    private function generateTickets(int $count)
+    private function generateTickets(int $count): void
     {
-        $users = User::pluck('id');
-        $statuses = Status::pluck('id');
+        $authors = User::query()->role('user')->pluck('id');
+        $supportUsers = User::query()->role('support')->pluck('id');
+        $statuses = Status::query()->pluck('id');
+        $priorities = ['low', 'medium', 'high', 'urgent'];
+
+        if ($authors->isEmpty() || $supportUsers->isEmpty() || $statuses->isEmpty()) {
+            return;
+        }
 
         for ($i = 1; $i <= $count; $i++) {
             Ticket::create([
-                'title' => "Тестовая заявка #$i",
-                'description' => "Описание тестовой заявки номер $i. Сгенерировано автоматически.",
+                'title' => "Тестовая заявка #{$i}",
+                'description' => "Автогенерированное описание заявки #{$i}.",
                 'status_id' => $statuses->random(),
-                'priority' => ['low', 'medium', 'high', 'urgent'][rand(0, 3)],
-                'assigned_to' => $users->random(),
+                'priority' => $priorities[array_rand($priorities)],
+                'assigned_to' => $supportUsers->random(),
+                'created_by' => $authors->random(),
                 'deadline' => now()->addDays(rand(1, 30)),
             ]);
         }

@@ -35,7 +35,15 @@ class PortalAuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(url('/admin'));
+        $user = $request->user();
+
+        if ($user?->isAdmin()) {
+            return redirect()->intended(url('/admin'));
+        }
+
+        $request->session()->forget('url.intended');
+
+        return redirect()->route('dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse
