@@ -15,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
@@ -36,6 +37,26 @@ class UserResource extends Resource
         $user = Auth::user();
 
         return (bool) ($user?->isGod() || $user?->can('users.manage'));
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::currentUserCanManageUsers();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::currentUserCanManageUsers() && ! static::isProtectedGodUser($record);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::currentUserCanManageUsers() && ! static::isProtectedGodUser($record);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::currentUserCanManageUsers();
     }
 
     public static function form(Schema $schema): Schema
@@ -92,13 +113,16 @@ class UserResource extends Resource
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->checkIfRecordIsSelectableUsing(fn (User $record): bool => ! static::isProtectedGodUser($record))
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (User $record): bool => static::canEdit($record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords(fn (User $record): bool => static::canDelete($record)),
                 ]),
             ]);
     }
@@ -111,5 +135,17 @@ class UserResource extends Resource
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    private static function currentUserCanManageUsers(): bool
+    {
+        $user = Auth::user();
+
+        return (bool) ($user?->isGod() || $user?->can('users.manage'));
+    }
+
+    private static function isProtectedGodUser(Model $record): bool
+    {
+        return $record instanceof User && $record->isGod();
     }
 }
