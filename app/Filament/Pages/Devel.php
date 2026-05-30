@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Comment;
+use App\Models\RequestHistory;
 use App\Models\Status;
 use App\Models\Ticket;
 use App\Models\User;
@@ -16,11 +18,14 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Spatie\Permission\Models\Role;
 use UnitEnum;
 
 class Devel extends Page implements HasForms
 {
     use InteractsWithForms;
+
+    private const BATCH_SIZE = 5;
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench';
 
@@ -33,6 +38,30 @@ class Devel extends Page implements HasForms
     protected string $view = 'filament.pages.devel';
 
     public ?array $data = [];
+
+    public bool $batchModalVisible = false;
+
+    public bool $batchConfirming = false;
+
+    public bool $batchRunning = false;
+
+    public string $batchType = '';
+
+    public string $batchTitle = '';
+
+    public string $batchQuestion = '';
+
+    public string $batchStatus = '';
+
+    public int $batchTotal = 0;
+
+    public int $batchProcessed = 0;
+
+    public int $batchDone = 0;
+
+    public int $batchProgress = 0;
+
+    public array $batchPayload = [];
 
     public function mount(): void
     {
@@ -70,15 +99,14 @@ class Devel extends Page implements HasForms
                             ->label('Создать пользователей')
                             ->icon('heroicon-o-plus')
                             ->color('success')
-                            ->action('createUsers'),
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmCreateUsers'),
                         Action::make('deleteUsers')
                             ->label('Удалить пользователей')
                             ->icon('heroicon-o-trash')
                             ->color('danger')
-                            ->requiresConfirmation()
-                            ->modalHeading('Удаление пользователей')
-                            ->modalDescription('Удалить всех тестовых пользователей кроме администратора?')
-                            ->action('deleteUsers'),
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmDeleteUsers'),
                     ]),
 
                 Section::make('Тикеты')
@@ -105,15 +133,14 @@ class Devel extends Page implements HasForms
                             ->label('Создать тикеты')
                             ->icon('heroicon-o-plus')
                             ->color('success')
-                            ->action('createTickets'),
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmCreateTickets'),
                         Action::make('deleteTickets')
                             ->label('Удалить все тикеты')
                             ->icon('heroicon-o-trash')
                             ->color('danger')
-                            ->requiresConfirmation()
-                            ->modalHeading('Удаление тикетов')
-                            ->modalDescription('Удалить все тикеты?')
-                            ->action('deleteTickets'),
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmDeleteTickets'),
                     ]),
 
                 Section::make('Статистика')
@@ -134,74 +161,241 @@ class Devel extends Page implements HasForms
             ->statePath('data');
     }
 
-    public function createUsers(): void
+    public function confirmCreateUsers(): void
     {
-        $count = $this->data['users_count'] ?? 10;
-        $roles = ['user', 'support', 'manager'];
+        $count = (int) ($this->data['users_count'] ?? 10);
 
-        for ($i = 1; $i <= $count; $i++) {
-            $role = $roles[($i - 1) % count($roles)];
-
-            User::updateOrCreate([
-                'email' => "test{$i}@example.com",
-            ], [
-                'name' => "Test {$role} {$i}",
-                'password' => bcrypt('password'),
-            ])->syncRoles([$role]);
-        }
-
-        Notification::make()->title("Создано {$count} пользователей")->success()->send();
-        $this->redirect(static::getUrl());
+        $this->showBatchConfirmation(
+            type: 'createUsers',
+            title: 'Создание пользователей',
+            question: "Создать {$count} тестовых пользователей пакетами?",
+            total: $count,
+        );
     }
 
-    public function deleteUsers(): void
+    public function confirmDeleteUsers(): void
     {
-        $count = User::where('id', '>', 1)->delete();
+        $count = User::where('id', '>', 1)->count();
 
-        Notification::make()->title("Удалено {$count} пользователей")->success()->send();
-        $this->redirect(static::getUrl());
+        $this->showBatchConfirmation(
+            type: 'deleteUsers',
+            title: 'Удаление пользователей',
+            question: "Удалить {$count} пользователей кроме администратора пакетами?",
+            total: $count,
+        );
     }
 
-    public function createTickets(): void
+    public function confirmCreateTickets(): void
     {
-        $count = $this->data['tickets_count'] ?? 30;
-        $created = $this->generateTickets($count);
+        $count = (int) ($this->data['tickets_count'] ?? 30);
 
-        Notification::make()->title("Создано {$created} тикетов")->success()->send();
-        $this->redirect(static::getUrl());
+        $this->showBatchConfirmation(
+            type: 'createTickets',
+            title: 'Создание тикетов',
+            question: "Создать {$count} тестовых тикетов пакетами?",
+            total: $count,
+        );
     }
 
-    public function deleteTickets(): void
+    public function confirmDeleteTickets(): void
     {
         $count = Ticket::count();
-        Ticket::truncate();
 
-        Notification::make()->title("Удалено {$count} тикетов")->success()->send();
-        $this->redirect(static::getUrl());
-    }
+        if ($count === 0) {
+            Notification::make()->title('Тикетов для удаления нет')->info()->send();
 
-    private function generateTickets(int $count): int
-    {
-        $authors = User::query()->role('user')->pluck('id')->all();
-        $supportUsers = User::query()->role('support')->pluck('id')->all();
-        $statuses = Status::query()->pluck('id')->all();
-
-        if (empty($authors) || empty($supportUsers) || empty($statuses)) {
-            Notification::make()
-                ->title('Нужны роли user/support и статусы')
-                ->danger()
-                ->send();
-
-            return 0;
+            return;
         }
 
-        $priorities = ['low', 'medium', 'high', 'urgent'];
-        $created = 0;
+        $this->showBatchConfirmation(
+            type: 'deleteTickets',
+            title: 'Удаление тикетов',
+            question: "Удалить {$count} тикетов пакетами: комментарии, историю, затем тикеты?",
+            total: $count,
+        );
+    }
 
-        for ($i = 1; $i <= $count; $i++) {
+    public function startBatch(): void
+    {
+        if (! $this->batchConfirming) {
+            return;
+        }
+
+        if ($this->batchTotal === 0) {
+            Notification::make()->title('Нет данных для обработки')->info()->send();
+            $this->resetBatch();
+
+            return;
+        }
+
+        if (! $this->prepareBatchPayload()) {
+            $this->resetBatch();
+
+            return;
+        }
+
+        $this->batchConfirming = false;
+        $this->batchRunning = true;
+        $this->batchStatus = "Запущено: {$this->batchTitle}.";
+    }
+
+    public function cancelBatch(): void
+    {
+        if (! $this->batchModalVisible) {
+            return;
+        }
+
+        $done = $this->batchDone;
+        $title = $this->batchTitle;
+
+        $this->resetBatch();
+
+        Notification::make()
+            ->title('Операция отменена')
+            ->body("{$title}: обработано {$done}.")
+            ->warning()
+            ->send();
+    }
+
+    public function processBatch(): void
+    {
+        if (! $this->batchRunning) {
+            return;
+        }
+
+        match ($this->batchType) {
+            'createUsers' => $this->processCreateUsersBatch(),
+            'deleteUsers' => $this->processDeleteUsersBatch(),
+            'createTickets' => $this->processCreateTicketsBatch(),
+            'deleteTickets' => $this->processDeleteTicketsBatch(),
+            default => $this->resetBatch(),
+        };
+
+        $this->refreshBatchProgress();
+
+        if ($this->batchProcessed >= $this->batchTotal) {
+            $this->finishBatch();
+        }
+    }
+
+    private function showBatchConfirmation(string $type, string $title, string $question, int $total): void
+    {
+        $this->batchModalVisible = true;
+        $this->batchConfirming = true;
+        $this->batchRunning = false;
+        $this->batchType = $type;
+        $this->batchTitle = $title;
+        $this->batchQuestion = $question;
+        $this->batchStatus = '';
+        $this->batchTotal = $total;
+        $this->batchProcessed = 0;
+        $this->batchDone = 0;
+        $this->batchProgress = 0;
+        $this->batchPayload = [];
+    }
+
+    private function prepareBatchPayload(): bool
+    {
+        if ($this->batchType === 'createUsers') {
+            $roles = Role::query()
+                ->where('name', '!=', 'admin')
+                ->orderBy('id')
+                ->pluck('name')
+                ->all();
+
+            if (empty($roles)) {
+                Notification::make()->title('Сначала создайте роли Spatie Permission')->danger()->send();
+
+                return false;
+            }
+
+            $this->batchPayload = ['roles' => $roles];
+        }
+
+        if ($this->batchType === 'createTickets') {
+            $authors = User::query()->role('user')->pluck('id')->all();
+            $supportUsers = User::query()->role('support')->pluck('id')->all();
+            $statuses = Status::query()->pluck('id')->all();
+
+            if (empty($authors) || empty($supportUsers) || empty($statuses)) {
+                Notification::make()
+                    ->title('Нужны роли user/support и статусы')
+                    ->danger()
+                    ->send();
+
+                return false;
+            }
+
+            $this->batchPayload = [
+                'authors' => $authors,
+                'supportUsers' => $supportUsers,
+                'statuses' => $statuses,
+                'priorities' => ['low', 'medium', 'high', 'urgent'],
+            ];
+        }
+
+        return true;
+    }
+
+    private function processCreateUsersBatch(): void
+    {
+        $roles = $this->batchPayload['roles'] ?? [];
+        $limit = min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed);
+
+        for ($i = 0; $i < $limit; $i++) {
+            $number = $this->batchProcessed + 1;
+            $role = $roles[($number - 1) % count($roles)];
+
+            User::updateOrCreate([
+                'email' => "test{$number}@example.com",
+            ], [
+                'name' => "Test {$role} {$number}",
+                'password' => bcrypt('password'),
+            ])->syncRoles([$role]);
+
+            $this->batchProcessed++;
+            $this->batchDone++;
+        }
+
+        $this->batchStatus = "Создано {$this->batchDone} из {$this->batchTotal} пользователей...";
+    }
+
+    private function processDeleteUsersBatch(): void
+    {
+        $userIds = User::query()
+            ->where('id', '>', 1)
+            ->orderBy('id')
+            ->limit(min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed))
+            ->pluck('id');
+
+        if ($userIds->isEmpty()) {
+            $this->batchProcessed = $this->batchTotal;
+
+            return;
+        }
+
+        foreach ($userIds as $userId) {
+            $this->batchDone += User::query()->whereKey($userId)->delete();
+            $this->batchProcessed++;
+        }
+
+        $this->batchStatus = "Удалено {$this->batchDone} из {$this->batchTotal} пользователей...";
+    }
+
+    private function processCreateTicketsBatch(): void
+    {
+        $limit = min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed);
+        $authors = $this->batchPayload['authors'] ?? [];
+        $supportUsers = $this->batchPayload['supportUsers'] ?? [];
+        $statuses = $this->batchPayload['statuses'] ?? [];
+        $priorities = $this->batchPayload['priorities'] ?? ['low', 'medium', 'high', 'urgent'];
+
+        for ($i = 0; $i < $limit; $i++) {
+            $number = $this->batchProcessed + 1;
+
             Ticket::create([
-                'title' => "Тестовая заявка #{$i}",
-                'description' => "Автогенерированное описание заявки #{$i}.",
+                'title' => "Тестовая заявка #{$number}",
+                'description' => "Автогенерированное описание заявки #{$number}.",
                 'status_id' => $statuses[array_rand($statuses)],
                 'priority' => $priorities[array_rand($priorities)],
                 'assigned_to' => $supportUsers[array_rand($supportUsers)],
@@ -209,9 +403,78 @@ class Devel extends Page implements HasForms
                 'deadline' => now()->addDays(rand(3, 45)),
             ]);
 
-            $created++;
+            $this->batchProcessed++;
+            $this->batchDone++;
         }
 
-        return $created;
+        $this->batchStatus = "Создано {$this->batchDone} из {$this->batchTotal} тикетов...";
+    }
+
+    private function processDeleteTicketsBatch(): void
+    {
+        $ticketIds = Ticket::query()
+            ->orderBy('id')
+            ->limit(min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed))
+            ->pluck('id');
+
+        if ($ticketIds->isEmpty()) {
+            $this->batchProcessed = $this->batchTotal;
+
+            return;
+        }
+
+        foreach ($ticketIds as $ticketId) {
+            Comment::query()->where('ticket_id', $ticketId)->delete();
+            RequestHistory::query()->where('ticket_id', $ticketId)->delete();
+
+            $this->batchDone += Ticket::query()->whereKey($ticketId)->delete();
+            $this->batchProcessed++;
+        }
+
+        $this->batchStatus = "Удалено {$this->batchDone} из {$this->batchTotal} тикетов...";
+    }
+
+    private function refreshBatchProgress(): void
+    {
+        if ($this->batchTotal === 0) {
+            $this->batchProgress = 0;
+
+            return;
+        }
+
+        $this->batchProgress = min(
+            100,
+            (int) round(($this->batchProcessed / $this->batchTotal) * 100),
+        );
+    }
+
+    private function finishBatch(): void
+    {
+        $title = $this->batchTitle;
+        $done = $this->batchDone;
+
+        $this->resetBatch();
+
+        Notification::make()
+            ->title("{$title}: готово")
+            ->body("Обработано {$done}.")
+            ->success()
+            ->send();
+    }
+
+    private function resetBatch(): void
+    {
+        $this->batchModalVisible = false;
+        $this->batchConfirming = false;
+        $this->batchRunning = false;
+        $this->batchType = '';
+        $this->batchTitle = '';
+        $this->batchQuestion = '';
+        $this->batchStatus = '';
+        $this->batchTotal = 0;
+        $this->batchProcessed = 0;
+        $this->batchDone = 0;
+        $this->batchProgress = 0;
+        $this->batchPayload = [];
     }
 }

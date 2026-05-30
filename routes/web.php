@@ -6,6 +6,15 @@ use App\Http\Controllers\UserTicketController;
 use Illuminate\Support\Facades\Route;
 
 
+/*
+                            use Fruitcake\LaravelDebugbar\Facades\Debugbar;
+
+                            Route::get('/test', function () {
+                                Debugbar::info('HELLO');  // или без use    \Debugbar::info('HELLO');
+
+                                return 'ok';
+                            });
+*/
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [PortalAuthController::class, 'create'])->name('login');

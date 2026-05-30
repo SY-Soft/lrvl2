@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class DevelController extends Controller
 {
@@ -29,7 +30,17 @@ class DevelController extends Controller
         ]);
 
         $usersCount = (int) $request->integer('users_count');
-        $roles = ['user', 'support', 'manager'];
+        $roles = Role::query()
+            ->where('name', '!=', 'admin')
+            ->orderBy('id')
+            ->pluck('name')
+            ->all();
+
+        if (empty($roles)) {
+            return redirect()
+                ->route('devel.index')
+                ->with('error', 'Сначала создайте роли Spatie Permission');
+        }
 
         for ($i = 1; $i <= $usersCount; $i++) {
             $role = $roles[($i - 1) % count($roles)];
