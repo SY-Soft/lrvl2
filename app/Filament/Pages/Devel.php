@@ -76,7 +76,7 @@ class Devel extends Page implements HasForms
         return $form
             ->schema([
                 Section::make('Пользователи')
-                    ->description('Создание и удаление тестовых пользователей')
+                    ->description('Создание и удаление тестовых пользователей (При повторном создании – может не создать, т.к. E-Mail’s уже существует)')
                     ->icon('heroicon-o-users')
                     ->schema([
                         Grid::make(12)
