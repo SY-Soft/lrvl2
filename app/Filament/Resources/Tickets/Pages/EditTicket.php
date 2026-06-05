@@ -47,4 +47,13 @@ class EditTicket extends EditRecord
             }
         }
     }
+
+    protected function getRedirectUrl(): string
+    {
+        // После сохранения — переход на просмотр тикета
+        return TicketResource::getUrl('view', ['record' => $this->record]);
+
+        // Или если у тебя нет View страницы, можно на show:
+        // return route('dashboard.tickets.show', $this->record);
+    }
 }
