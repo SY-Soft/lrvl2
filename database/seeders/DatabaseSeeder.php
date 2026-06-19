@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminSeeder::class,
             StatusSeeder::class,
+            CategorySeeder::class,
         ]);
 
         User::updateOrCreate(

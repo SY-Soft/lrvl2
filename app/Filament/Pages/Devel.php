@@ -20,6 +20,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Spatie\Permission\Models\Role;
 use UnitEnum;
+use App\Models\Category;
+use App\Models\Product;
 
 class Devel extends Page implements HasForms
 {
@@ -68,6 +70,7 @@ class Devel extends Page implements HasForms
         $this->form->fill([
             'users_count' => 10,
             'tickets_count' => 30,
+            'products_count' => 50,
         ]);
     }
 
@@ -143,6 +146,40 @@ class Devel extends Page implements HasForms
                             ->action('confirmDeleteTickets'),
                     ]),
 
+                Section::make('Товары')
+                    ->description('Создание и удаление тестовых товаров')
+                    ->icon('heroicon-o-shopping-bag')
+                    ->schema([
+                        Grid::make(12)
+                            ->schema([
+                                TextInput::make('products_count')
+                                    ->label('Количество товаров')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->maxValue(500)
+                                    ->default(50)
+                                    ->required()
+                                    ->columnSpan([
+                                        'default' => 12,
+                                        'lg' => 4,
+                                    ]),
+                            ]),
+                    ])
+                    ->footerActions([
+                        Action::make('createProducts')
+                            ->label('Создать товары')
+                            ->icon('heroicon-o-plus')
+                            ->color('success')
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmCreateProducts'),
+                        Action::make('deleteProducts')
+                            ->label('Удалить все товары')
+                            ->icon('heroicon-o-trash')
+                            ->color('danger')
+                            ->disabled(fn (): bool => $this->batchModalVisible)
+                            ->action('confirmDeleteProducts'),
+                    ]),
+
                 Section::make('Статистика')
                     ->description('Текущее состояние тестовых данных')
                     ->icon('heroicon-o-chart-bar')
@@ -214,7 +251,34 @@ class Devel extends Page implements HasForms
             total: $count,
         );
     }
+    public function confirmCreateProducts(): void
+    {
+        $count = (int) ($this->data['products_count'] ?? 50);
 
+        $this->showBatchConfirmation(
+            type: 'createProducts',
+            title: 'Создание товаров',
+            question: "Создать {$count} тестовых товаров?",
+            total: $count,
+        );
+    }
+
+    public function confirmDeleteProducts(): void
+    {
+        $count = Product::count();
+
+        if ($count === 0) {
+            Notification::make()->title('Товаров для удаления нет')->info()->send();
+            return;
+        }
+
+        $this->showBatchConfirmation(
+            type: 'deleteProducts',
+            title: 'Удаление товаров',
+            question: "Удалить {$count} товаров (включая категории, если они не используются)?",
+            total: $count,
+        );
+    }
     public function startBatch(): void
     {
         if (! $this->batchConfirming) {
@@ -268,6 +332,8 @@ class Devel extends Page implements HasForms
             'deleteUsers' => $this->processDeleteUsersBatch(),
             'createTickets' => $this->processCreateTicketsBatch(),
             'deleteTickets' => $this->processDeleteTicketsBatch(),
+            'createProducts' => $this->processCreateProductsBatch(),
+            'deleteProducts' => $this->processDeleteProductsBatch(),
             default => $this->resetBatch(),
         };
 
@@ -332,6 +398,13 @@ class Devel extends Page implements HasForms
                 'statuses' => $statuses,
                 'priorities' => ['low', 'medium', 'high', 'urgent'],
             ];
+        }
+
+        if ($this->batchType === 'createProducts') {
+            // Создаём категории, если их нет
+            if (Category::count() === 0) {
+                $this->createDefaultCategories();
+            }
         }
 
         return true;
@@ -476,5 +549,67 @@ class Devel extends Page implements HasForms
         $this->batchDone = 0;
         $this->batchProgress = 0;
         $this->batchPayload = [];
+    }
+    private function createDefaultCategories(): void
+    {
+        $categories = [
+            'Электроника', 'Одежда', 'Книги', 'Дом и сад',
+            'Спорт', 'Автотовары', 'Косметика'
+        ];
+
+        foreach ($categories as $name) {
+            Category::firstOrCreate(
+                ['slug' => \Str::slug($name)],
+                ['name' => $name]
+            );
+        }
+    }
+    private function processCreateProductsBatch(): void
+    {
+        $limit = min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed);
+        $categories = Category::pluck('id')->all();
+
+        if (empty($categories)) {
+            $this->batchProcessed = $this->batchTotal;
+            return;
+        }
+
+        for ($i = 0; $i < $limit; $i++) {
+            $number = $this->batchProcessed + 1;
+
+            Product::create([
+                'name'        => "Товар #{$number} — " . fake()->words(3, true),
+                'description' => fake()->paragraph(2),
+                'price'       => fake()->randomFloat(2, 499, 49990),
+                'category_id' => $categories[array_rand($categories)],
+                'stock'       => fake()->numberBetween(0, 200),
+                'is_active'   => true,
+            ]);
+
+            $this->batchProcessed++;
+            $this->batchDone++;
+        }
+
+        $this->batchStatus = "Создано {$this->batchDone} из {$this->batchTotal} товаров...";
+    }
+
+    private function processDeleteProductsBatch(): void
+    {
+        $productIds = Product::query()
+            ->orderBy('id')
+            ->limit(min(self::BATCH_SIZE, $this->batchTotal - $this->batchProcessed))
+            ->pluck('id');
+
+        if ($productIds->isEmpty()) {
+            $this->batchProcessed = $this->batchTotal;
+            return;
+        }
+
+        foreach ($productIds as $id) {
+            $this->batchDone += Product::whereKey($id)->delete();
+            $this->batchProcessed++;
+        }
+
+        $this->batchStatus = "Удалено {$this->batchDone} из {$this->batchTotal} товаров...";
     }
 }
