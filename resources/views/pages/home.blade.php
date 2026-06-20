@@ -39,6 +39,9 @@
                             <span>Сборка</span>
                             <strong>Vite</strong>
                         </div>
+                        <div class="summary-row">
+                           /dashboard/tickets - пределать на liveware и проверить статусы
+                        </div>
                     </div>
                 </div>
             </div>

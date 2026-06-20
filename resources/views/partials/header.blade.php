@@ -17,6 +17,9 @@
                     </li>
                     @auth
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('products.index') ? 'active' : '' }}" href="{{ route('products.index') }}">Продукты</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Кабинет</a>
                         </li>
                         <li class="nav-item">

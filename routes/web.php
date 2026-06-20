@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\PortalAuthController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\UserTicketController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Products\Index as ProductsIndex;
 
 
 /*
@@ -43,3 +44,8 @@ Route::middleware('auth')
         Route::post('/{ticket}/comments', [UserTicketController::class, 'comment'])->name('comments.store');
         Route::patch('/{ticket}/status', [UserTicketController::class, 'status'])->name('status.update');
     });
+
+
+
+Route::get('/products', ProductsIndex::class)
+    ->name('products.index');

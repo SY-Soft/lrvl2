@@ -34,7 +34,12 @@ class UserTicketController extends Controller
 
         $tickets = $query->paginate(15)->withQueryString();
 
-        return view('pages.tickets.index', compact('tickets'));
+        return view('pages.tickets.index',
+        [
+        'tickets' => $tickets,
+            'statuses' => Status::query()->orderBy('order')->get(),
+        ]
+    );
     }
 
     public function create(): View
