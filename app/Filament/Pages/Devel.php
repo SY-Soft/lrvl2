@@ -184,7 +184,7 @@ class Devel extends Page implements HasForms
                     ->description('Текущее состояние тестовых данных')
                     ->icon('heroicon-o-chart-bar')
                     ->schema([
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
                                 Placeholder::make('users_stats')
                                     ->label('Пользователей всего')
@@ -192,6 +192,9 @@ class Devel extends Page implements HasForms
                                 Placeholder::make('tickets_stats')
                                     ->label('Тикетов всего')
                                     ->content(fn () => Ticket::count() . ' шт.'),
+                                Placeholder::make('products_stats')
+                                    ->label('Товаров всего')
+                                    ->content(fn () => Product::count() . ' шт.'),
                             ]),
                     ]),
             ])

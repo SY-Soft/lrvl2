@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Product;
 use App\Models\Status;
 use App\Models\Ticket;
 use App\Models\User;
@@ -21,7 +22,7 @@ class Dashboard extends BaseDashboard
                     ->description('Текущее состояние тестовых данных')
                     ->icon('heroicon-o-chart-bar')
                     ->schema([
-                        Grid::make(3)
+                        Grid::make(4)
                             ->schema([
                                 Placeholder::make('users_stats')
                                     ->label('Пользователей всего')
@@ -32,6 +33,9 @@ class Dashboard extends BaseDashboard
                                 Placeholder::make('statuses_stats')
                                     ->label('Статусов всего')
                                     ->content(fn () => Status::count() . ' шт.'),
+                                 Placeholder::make('products_stats')
+                                    ->label('Продуктов всего')
+                                    ->content(fn () => Product::count() . ' шт.'),
                             ]),
                     ]),
                 ...(method_exists($this, 'getFiltersForm') ? [$this->getFiltersFormContentComponent()] : []),
