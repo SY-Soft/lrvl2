@@ -1,4 +1,19 @@
-<div class="container py-5">
+<div class="container py-5 position-relative">
+
+    <div
+        wire:loading
+        class="position-absolute top-0 start-0 w-100 h-100"
+        style="background: rgba(255,255,255,.8); z-index:999;"
+    >
+        <div style="height:100vh;display:flex;align-items:center;justify-content:center;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2">Загрузка...</div>
+        </div>
+        </div>
+    </div>
+
+
     <h1 class="mb-4">Продукты</h1>
     <div class="row mb-4 g-3">
         <div class="col-md-5">
