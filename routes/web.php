@@ -5,6 +5,7 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\UserTicketController;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Products\Index as ProductsIndex;
+use App\Livewire\Tickets\Index as TicketsIndex;
 
 
 /*
@@ -37,7 +38,8 @@ Route::middleware('auth')
     ->prefix('dashboard/tickets')
     ->name('dashboard.tickets.')
     ->group(function () {
-        Route::get('/', [UserTicketController::class, 'index'])->name('index');
+        Route::get('/', [TicketsIndex::class, 'render'])->name('index');
+        /* Route::get('/', [UserTicketController::class, 'index'])->name('index'); */
         Route::get('/create', [UserTicketController::class, 'create'])->name('create');
         Route::post('/', [UserTicketController::class, 'store'])->name('store');
         Route::get('/{ticket}', [UserTicketController::class, 'show'])->name('show');

@@ -34,7 +34,7 @@ class ProductForm
                 TextInput::make('price')
                     ->label('Цена')
                     ->numeric()
-                    ->prefix('₽')
+                    ->prefix('₴')
                     ->required()
                     ->minValue(0),
 

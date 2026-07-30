@@ -58,7 +58,7 @@
                         <p class="card-text text-truncate">{{ \Illuminate\Support\Str::limit($product->description, 90) }}</p>
 
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <h4 class="text-primary mb-0">{{ number_format($product->price, 2) }} ₽</h4>
+                            <h4 class="text-primary mb-0">{{ number_format($product->price, 2) }} ₴</h4>
                             @if($product->stock > 0)
                                 <span class="badge bg-success">В наличии: {{ $product->stock }}</span>
                             @else
