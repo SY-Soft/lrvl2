@@ -17,13 +17,13 @@
                     </li>
                     @auth
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('products.index') ? 'active' : '' }}" href="{{ route('products.index') }}">Продукты</a>
+                            <a class="nav-link {{ request()->routeIs('products.index') ? 'active' : '' }}" href="{{ route('products.index') }}">Товары</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard.tickets.*') ? 'active' : '' }}" href="{{ route('dashboard.tickets.index') }}">Заявки</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Кабинет</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard.tickets.*') ? 'active' : '' }}" href="{{ route('dashboard.tickets.index') }}">Тикеты</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-primary btn-sm px-3" href="{{ route('dashboard.tickets.create') }}">

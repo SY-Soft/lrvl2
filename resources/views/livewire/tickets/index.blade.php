@@ -1,20 +1,9 @@
 <div class="container py-5 position-relative">
 
-    <div
-        wire:loading
-        class="position-absolute top-0 start-0 w-100 h-100"
-        style="background: rgba(255,255,255,.8); z-index:999;"
-    >
-        <div style="height:100vh;display:flex;align-items:center;justify-content:center;">
-            <div class="text-center">
-                <div class="spinner-border text-primary" role="status"></div>
-                <div class="mt-2">Загрузка...</div>
-            </div>
-        </div>
-    </div>
+
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="mb-0">Мои заявки</h1>
+        <h1 class="mb-0">Заявки</h1>
 
         <a href="{{ route('dashboard.tickets.create') }}"
            class="btn btn-primary">

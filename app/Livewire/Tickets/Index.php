@@ -62,7 +62,9 @@ class Index extends Component
             'tickets' => $tickets,
             'statuses' => $statuses,
             'direction' => $this->direction,
-        ])->layout('layouts.app');
+            ])
+            ->layout('layouts.app')
+            ->title(__('Заявки'));
     }
 
     public function resetFilters(): void

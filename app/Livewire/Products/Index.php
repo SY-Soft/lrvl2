@@ -41,7 +41,9 @@ class Index extends Component
         return view('livewire.products.index', [
             'products' => $products,
             'categories' => $categories,
-        ])->layout('layouts.app');   // или layouts.guest, если хочешь без авторизации
+            ])
+            ->layout('layouts.app')
+            ->title(__('Товары'));
     }
     public function resetFilters()
     {
