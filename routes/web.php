@@ -38,7 +38,7 @@ Route::middleware('auth')
     ->prefix('dashboard/tickets')
     ->name('dashboard.tickets.')
     ->group(function () {
-        Route::get('/', [TicketsIndex::class, 'render'])->name('index');
+        Route::get('/', TicketsIndex::class)->name('index');
         /* Route::get('/', [UserTicketController::class, 'index'])->name('index'); */
         Route::get('/create', [UserTicketController::class, 'create'])->name('create');
         Route::post('/', [UserTicketController::class, 'store'])->name('store');
@@ -47,7 +47,8 @@ Route::middleware('auth')
         Route::patch('/{ticket}/status', [UserTicketController::class, 'status'])->name('status.update');
     });
 
-
+// Route::get('/', [TicketsIndex::class, 'render'])->name('index');
+// Route::get('/', TicketsIndex::class)->name('index');
 
 Route::get('/products', ProductsIndex::class)
     ->name('products.index');

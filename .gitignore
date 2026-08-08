@@ -1,6 +1,8 @@
 *.log
 .DS_Store
 .2del_SY
+.2del_SY4GPT
+.2tree.sh
 .env
 .env.backup
 .env.production
@@ -31,3 +33,5 @@ Thumbs.db
 /.4me
 /..back/
 /bootstrap/cache
+.4ai
+/structure.txt
