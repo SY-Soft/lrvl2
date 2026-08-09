@@ -37,7 +37,7 @@ class PortalAuthController extends Controller
 
         $user = $request->user();
 
-        if ($user?->isAdmin()) {
+        if ($user?->isAdmin() ||  $user?->isManager()) {
             return redirect()->intended(url('/admin'));
         }
 

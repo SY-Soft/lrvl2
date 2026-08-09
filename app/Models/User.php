@@ -40,7 +40,12 @@ class User extends Authenticatable implements FilamentUser
 
     public function isAdmin(): bool
     {
-        return $this->isGod() || $this->hasAnyRole(['admin', 'manager']);
+        return $this->isGod() || $this->hasRole('admin');
+    }
+
+    public function isManager(): bool
+    {
+        return $this->hasRole('manager');
     }
 
     public function isGod(): bool
@@ -55,11 +60,11 @@ class User extends Authenticatable implements FilamentUser
 
     public function canManageTickets(): bool
     {
-        return $this->isAdmin();
+        return $this->isAdmin() || $this->isManager();
     }
 
     public function canWorkTickets(): bool
     {
-        return $this->isAdmin() || $this->isSupport();
+        return $this->isAdmin() || $this->isManager() || $this->isSupport();
     }
 }

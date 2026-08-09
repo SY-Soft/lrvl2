@@ -48,7 +48,7 @@ class TicketQueryService
     {
         $user = $request->user();
 
-        if ($user->isAdmin() || $user->can('tickets.view-all')) {
+        if ($user->isAdmin()  ||  $user->isManager() || $user->can('tickets.view-all')) {
             return Ticket::query();
         }
 

@@ -12,7 +12,7 @@ class EnsureCanViewTicketAction
         $user = $request->user();
 
         abort_unless(
-            $user->isAdmin()
+            $user->isAdmin() ||  $user->isManager()
             || $user->can('tickets.view-all')
             || ($user->can('tickets.view-own') && $ticket->created_by === $user->id)
             || ($user->can('tickets.view-assigned') && $ticket->assigned_to === $user->id),
