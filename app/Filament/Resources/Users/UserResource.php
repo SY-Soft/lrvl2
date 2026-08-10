@@ -43,22 +43,67 @@ class UserResource extends Resource
     {
         return static::currentUserCanManageUsers();
     }
-
+    public static function canView(Model $record): bool
+    {
+        return static::currentUserCanManageUsers()
+            && static::canManageTargetUser($record);
+    }
     public static function canEdit(Model $record): bool
     {
-        return static::currentUserCanManageUsers() && ! static::isProtectedGodUser($record);
+        return static::currentUserCanManageUsers()
+            && static::canManageTargetUser($record)
+            && ! static::isProtectedGodUser($record);
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::currentUserCanManageUsers() && ! static::isProtectedGodUser($record);
+        return static::currentUserCanManageUsers()
+            && static::canManageTargetUser($record)
+            && ! static::isProtectedGodUser($record);
     }
 
+    private static function canManageTargetUser(Model $record): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->isGod() || $user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isManager()) {
+            return $record instanceof User
+                && $record->hasAnyRole(['user', 'support'])
+                && !$record->hasAnyRole(['admin', 'manager']);
+        }
+
+        return false;
+    }
     public static function canDeleteAny(): bool
     {
         return static::currentUserCanManageUsers();
     }
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
 
+        $user = Auth::user();
+
+        if ($user?->isManager()) {
+            $query
+                ->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['user', 'support']);
+                })
+                ->whereDoesntHave('roles', function ($q) {
+                    $q->whereIn('name', ['admin', 'manager']);
+                });
+        }
+
+        return $query;
+    }
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -83,7 +128,13 @@ class UserResource extends Resource
                         ->maxLength(255),
                     Forms\Components\Select::make('roles')
                         ->label('Роли')
-                        ->relationship('roles', 'name')
+                        ->relationship(
+                            'roles',
+                            'name',
+                            fn ($query) => Auth::user()?->isManager()
+                                ? $query->whereIn('name', ['user', 'support'])
+                                : $query
+                        )
                         ->multiple()
                         ->preload()
                         ->required(),
