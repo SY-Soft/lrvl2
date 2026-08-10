@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TicketResource extends Resource
 {
@@ -64,7 +65,16 @@ class TicketResource extends Resource
 
                     Forms\Components\Select::make('assigned_to')
                         ->label('Исполнитель')
-                        ->relationship('assignedTo', 'name')
+                        ->relationship(
+                            'assignedTo',
+                            'name',
+                            modifyQueryUsing: fn (Builder $query) =>
+                            $query->whereHas(
+                                'roles',
+                                fn (Builder $query) =>
+                                $query->where('name', 'support')
+                            )
+                        )
                         ->searchable()
                         ->preload()
                         ->nullable(),

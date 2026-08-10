@@ -24,8 +24,21 @@ class TicketForm
                 TextInput::make('created_by')
                     ->required()
                     ->numeric(),
-                TextInput::make('assigned_to')
-                    ->numeric(),
+                Select::make('assigned_to')
+                    ->label('Исполнитель')
+                    ->relationship(
+                        'assignedTo',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) =>
+                        $query->whereHas(
+                            'roles',
+                            fn (Builder $query) =>
+                            $query->where('name', 'support')
+                        )
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
                 Select::make('priority')
                     ->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High'])
                     ->default('medium')
