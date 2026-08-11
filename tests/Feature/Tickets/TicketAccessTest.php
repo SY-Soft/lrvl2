@@ -7,10 +7,17 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Concerns\SeedsRoles;
 
 class TicketAccessTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, SeedsRoles;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setUpSeedsRoles();
+    }
 
     private function statusId(): int
     {

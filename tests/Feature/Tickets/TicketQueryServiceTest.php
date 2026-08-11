@@ -12,14 +12,26 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
+use Tests\Concerns\SeedsRoles;
 
 class TicketQueryServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, SeedsRoles;
 
     private TicketQueryService $service;
-    protected $seed = RoleSeeder::class;
 
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setUpSeedsRoles();
+
+        $this->service = new TicketQueryService();
+
+        Status::factory()->create();
+
+    }
     private function user(): User
     {
         $user = User::factory()->create();
@@ -55,15 +67,6 @@ class TicketQueryServiceTest extends TestCase
         );
     }
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->service = new TicketQueryService();
-
-        Status::factory()->create();
-
-    }
 
 
     public function test_admin_can_see_all_tickets(): void

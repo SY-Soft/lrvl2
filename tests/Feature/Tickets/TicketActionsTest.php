@@ -8,11 +8,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Database\Seeders\RoleSeeder;
+use Tests\Concerns\SeedsRoles;
 
 class TicketActionsTest extends TestCase
 {
-    use RefreshDatabase;
-    protected $seed = RoleSeeder::class;
+    use RefreshDatabase, SeedsRoles;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setUpSeedsRoles();
+    }
+
     private function user(): User
     {
         $user = User::factory()->create();
