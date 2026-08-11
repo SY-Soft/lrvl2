@@ -7,7 +7,6 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Spatie\Permission\Models\Role;
 use Database\Seeders\RoleSeeder;
 
 class TicketActionsTest extends TestCase
