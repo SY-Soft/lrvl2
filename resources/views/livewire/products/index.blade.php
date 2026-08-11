@@ -1,9 +1,11 @@
 <div class="container py-5 position-relative">
 
-
-
-
     <h1 class="mb-4">Товары</h1>
+
+    @if(auth()->user()?->isAdmin())
+        @livewire('modules.product-price-change.livewire.bulk-cents-panel')
+    @endif
+
     <div class="row mb-4 g-3">
         <div class="col-md-5">
             <input type="text"

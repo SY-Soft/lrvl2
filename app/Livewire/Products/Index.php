@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\On;
 
 class Index extends Component
 {
@@ -55,4 +56,10 @@ class Index extends Component
     public function updatedSearch() { $this->resetPage(); }
     public function updatedCategoryId() { $this->resetPage(); }
     public function updatedSort() { $this->resetPage(); }
+
+    #[On('prices-updated')]
+    public function refreshProducts(): void
+    {
+        // ничего не делаем
+    }
 }
