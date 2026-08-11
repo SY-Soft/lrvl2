@@ -64,6 +64,9 @@
                             <a class="nav-link" href="#features">Возможности</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('products.index') ? 'active' : '' }}" href="{{ route('products.index') }}" target="_blank">Товары</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="btn btn-outline-dark btn-sm px-3" href="{{ route('login') }}">
                                 <i class="bi bi-box-arrow-in-right"></i>
                                 Войти

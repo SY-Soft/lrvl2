@@ -163,6 +163,7 @@ class UserResource extends Resource
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
+            ->recordUrl(null)
             ->defaultSort('created_at', 'desc')
             ->checkIfRecordIsSelectableUsing(fn (User $record): bool => ! static::isProtectedGodUser($record))
             ->recordActions([

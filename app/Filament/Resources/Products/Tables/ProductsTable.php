@@ -10,7 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Tables\Filters;
+// use Filament\Tables\Filters;
 
 class ProductsTable
 {
@@ -21,12 +21,10 @@ class ProductsTable
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
-
                 TextColumn::make('name')
                     ->label('Название')
                     ->searchable()
                     ->sortable(),
-
                 TextColumn::make('category.name')           // вместо category_id
                 ->label('Категория')
                     ->sortable()
@@ -59,6 +57,7 @@ class ProductsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(null)
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Категория')

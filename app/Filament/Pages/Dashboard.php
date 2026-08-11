@@ -11,9 +11,12 @@ use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use BackedEnum;
 
 class Dashboard extends BaseDashboard
 {
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
     public function content(Schema $schema): Schema
     {
         return $schema
@@ -42,4 +45,6 @@ class Dashboard extends BaseDashboard
                 $this->getWidgetsContentComponent(),
             ]);
     }
+
+
 }

@@ -615,4 +615,8 @@ class Devel extends Page implements HasForms
 
         $this->batchStatus = "Удалено {$this->batchDone} из {$this->batchTotal} товаров...";
     }
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
 }

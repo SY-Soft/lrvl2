@@ -75,6 +75,7 @@ class TicketsTable
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
+            ->recordUrl(null)
             ->defaultSort('created_at', 'desc')
             ->filters(
                 [

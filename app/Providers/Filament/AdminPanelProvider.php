@@ -6,6 +6,7 @@ use App\Http\Middleware\RedirectFilamentGuestsToPortalLogin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -37,6 +38,12 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
+            ])
+            ->navigationItems([
+                NavigationItem::make('На главную')
+                    ->url('/')                          // или url('/') / route('home')
+                    ->icon('heroicon-o-home')
+                    ->sort(-100),                         // чтобы было самым верхним
             ])
             ->middleware([
                 EncryptCookies::class,
