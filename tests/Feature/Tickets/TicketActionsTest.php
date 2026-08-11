@@ -190,6 +190,33 @@ class TicketActionsTest extends TestCase
             'status_id' => $inProgressStatus->id,
         ]);
     }
+    public function test_user_cannot_change_ticket_status(): void
+    {
+        $user = $this->user();
 
+        $newStatus = $this->newStatus();
+        $inProgressStatus = $this->inProgressStatus();
+
+        $ticket = Ticket::factory()->create([
+            'created_by' => $user->id,
+            'status_id' => $newStatus->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(
+                route('dashboard.tickets.status.update', $ticket),
+                [
+                    'status_id' => $inProgressStatus->id,
+                ]
+            );
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('tickets', [
+            'id' => $ticket->id,
+            'status_id' => $newStatus->id,
+        ]);
+    }
 
 }
