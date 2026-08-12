@@ -48,8 +48,5 @@ class ProductPriceChangeJob implements ShouldQueue
             }
         }
     }
-    private function normalizePrice(float $price, int $cents): float
-    {
-        return ((int) $price) + ($cents / 100);
-    }
+
 }

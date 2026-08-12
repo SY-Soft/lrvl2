@@ -23,11 +23,6 @@ class BulkCentsPanel extends Component
             return;
         }
 
-
-        $query = Product::query()->select('id');
-
-
-
         $query = Product::query()->select('id');
 
         match ($this->sort) {
