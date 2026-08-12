@@ -48,6 +48,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @vite(['resources/js/app.js'])
     @livewireScripts
+
+
 <script>
     document.addEventListener('livewire:init', () => {
 
@@ -72,16 +74,44 @@
             }
         };
 
-        Livewire.hook('request', ({ succeed, fail }) => {
+        Livewire.hook('request', ({ payload, succeed, fail }) => {
+
+            const data = typeof payload === 'string'
+                ? JSON.parse(payload)
+                : payload;
+
+            const component = data.components?.[0];
+
+            const componentName = component?.snapshot
+                ? JSON.parse(component.snapshot).memo.name
+                : null;
+
+            const isPolling =
+                Array.isArray(component?.calls) && component.calls.length === 0 &&
+                component?.updates && Object.keys(component.updates).length === 0;
+
+            /*
+            console.log({
+                componentName,
+                isPolling,
+                calls: component?.calls,
+                updates: component?.updates
+            });
+*/
+
+            if ((isPolling && componentName === 'products') || componentName === 'modules.product-price-change.livewire.bulk-cents-panel') {
+                return;
+            }
 
             show();
 
             succeed(() => hide());
             fail(() => hide());
-
         });
 
     });
 </script>
+
+
 </body>
 </html>

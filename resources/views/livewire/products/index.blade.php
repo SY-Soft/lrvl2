@@ -2,8 +2,28 @@
 
     <h1 class="mb-4">Товары</h1>
 
+    {{--
+    <div class="container product-price-change">
+        <div class="row">
+            <div class="col-12 title">Demo Queues & Jobs</div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6 ppc-action">
+
+                <select  class="form-select form-select-sm w-auto lw-no-global-loader">
+                    <option value="0">.00</option>
+                    <option value="25">.25</option>
+                    <option value="50">.50</option>
+                    <option value="75">.75</option>
+                </select>
+                <span>коп.</span>
+                <button class="btn btn-primary btn-sm">Применить ко всем</button>
+            </div>
+
+        </div>
+    </div>
+--}}
     @if(auth()->user()?->isAdmin())
-        @livewire('modules.product-price-change.livewire.bulk-cents-panel')
+        @livewire('modules.product-price-change.livewire.bulk-cents-panel', [ 'sort' => $sort, ], key('bulk-cents-'.$sort))
     @endif
 
     <div class="row mb-4 g-3">
@@ -39,7 +59,10 @@
         </div>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 lw-no-global-loader"
+        {{ auth()->user()?->isAdmin() ? 'wire:poll.2s' : '' }}
+    >
+
         @foreach($products as $product)
             <div class="col">
                 <div class="card h-100">
@@ -49,7 +72,7 @@
                         <p class="card-text text-truncate">{{ \Illuminate\Support\Str::limit($product->description, 90) }}</p>
 
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <h4 class="text-primary mb-0">{{ number_format($product->price, 2) }} ₴</h4>
+                            <h4 class="mb-0 {{ $product->updated_at->gt(now()->subMinute()) ? 'text-danger' : 'text-primary' }}"> {{ number_format($product->price, 2) }} ₴ </h4>
                             @if($product->stock > 0)
                                 <span class="badge bg-success">В наличии: {{ $product->stock }}</span>
                             @else
