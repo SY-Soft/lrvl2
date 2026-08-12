@@ -20,13 +20,21 @@ class ProductPriceChangeJob implements ShouldQueue
 
     public function handle(): void
     {
+/*
+        Log::info('PRODUCT JOB START', [
+            'product' => $this->productId,
+            'operation' => $this->operationId,
+            'pid' => getmypid(),
+            'time' => now()->toDateTimeString(),
+        ]);
+*/
         $product = Product::find($this->productId);
 
         if (! $product) {
             return;
         }
 
-       // sleep(1);
+        sleep(2);
 
         $whole = (int) $product->price;
 
@@ -41,7 +49,9 @@ class ProductPriceChangeJob implements ShouldQueue
         if ($operation) {
             $operation->increment('processed');
 
-            if ($operation->processed + 1 >= $operation->total) {
+            $operation->refresh();
+
+            if ($operation->processed >= $operation->total) {
                 $operation->update([
                     'completed' => true,
                 ]);

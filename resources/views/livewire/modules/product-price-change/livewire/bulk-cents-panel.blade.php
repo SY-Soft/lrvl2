@@ -1,58 +1,9 @@
-{{--
-<div class="p-4 mb-4 border rounded-lg bg-gray-50 dark:bg-gray-800  lw-no-global-loader" wire:poll.1s>
-    <div class="font-semibold mb-2">
-        ProductPriceChange
-    </div>
-
-    <div class="flex items-center gap-2">
-        <select  wire:model="cents" class="form-select form-select-sm w-auto lw-no-global-loader">
-            <option value="0">.00</option>
-            <option value="25">.25</option>
-            <option value="50">.50</option>
-            <option value="75">.75</option>
-        </select>
-
-        <button
-            wire:click="apply"
-            wire:loading.attr="disabled"
-            class="btn btn-primary btn-sm"
-            @disabled($this->isRunning())
-        >
-            @if($this->isRunning())
-                <span class="spinner-border spinner-border-sm me-1"></span>
-                Выполняется...
-            @else
-                <span wire:loading.remove wire:target="apply">
-            Применить ко всем
-        </span>
-
-                <span wire:loading wire:target="apply">
-            <span class="spinner-border spinner-border-sm me-1"></span>
-            В очередь...
-        </span>
-            @endif
-        </button>
-        @if($this->isRunning())
-            <div class="mt-3">
-                <div class="d-flex justify-content-between small mb-1"><span>Выполняется</span> <span>{{ $this->progress }}%</span>
-                </div>
-                <div class="progress" style="height: 8px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                         style="width: {{ $this->progress }}%"></div>
-                </div>
-            </div>
-        @endif
-    </div>
-
-</div>
---}}
-
 <div class="card shadow-sm mb-4 lw-no-global-loader" wire:poll.1s>
     <div class="card-body">
 
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="fw-semibold text-primary">
-                Demo Queues & Jobs
+                Demo Redis Queue + Job + Progress bar
             </div>
 
             @if($this->isRunning())
