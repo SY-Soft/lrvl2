@@ -97,10 +97,10 @@ class BulkCentsPanel extends Component
         }
 
         $this->operation = ProductPriceChangeOperation::create([
-            'cents' => 1,
-            'total' => 1,
+            'uuid' => (string) Str::uuid(),
+            'cents' => $this->cents,
+            'total' => 5,
             'processed' => 0,
-            'failed' => 0,
             'completed' => false,
         ]);
 

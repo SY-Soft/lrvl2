@@ -16,7 +16,7 @@ class ProductPriceChangeJob implements ShouldQueue
     public function __construct(
         public int $productId,
         public int $cents,
-        public int $operationId,
+        public string $operationId,
         public bool $forceFail = false,
         public bool $isRetry = false,
     ) {}
@@ -51,7 +51,7 @@ class ProductPriceChangeJob implements ShouldQueue
             'price' => $newPrice,
         ]);
 
-        $operation = ProductPriceChangeOperation::find($this->operationId);
+        $operation = ProductPriceChangeOperation::where('uuid', $this->operationUuid)->first();
 
         if ($operation) {
             $operation->increment('processed');
