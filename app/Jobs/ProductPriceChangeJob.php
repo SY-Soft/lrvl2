@@ -16,7 +16,7 @@ class ProductPriceChangeJob implements ShouldQueue
     public function __construct(
         public int $productId,
         public int $cents,
-        public string $operationId,
+        public string $operationUuid,
         public bool $forceFail = false,
         public bool $isRetry = false,
     ) {}
@@ -66,17 +66,21 @@ class ProductPriceChangeJob implements ShouldQueue
 
     public function failed(?\Throwable $e): void
     {
-        $operation = ProductPriceChangeOperation::find($this->operationId);
+        $operation = ProductPriceChangeOperation::where('uuid', $this->operationUuid)->first();
 
         if (! $operation) {
             return;
         }
+
         $operation->increment('failed');
 
         $operation->refresh();
 
         if (($operation->processed + $operation->failed) >= $operation->total) {
-            $operation->update(['completed' => true]);
+            $operation->update([
+                'completed' => true,
+            ]);
         }
     }
+
 }

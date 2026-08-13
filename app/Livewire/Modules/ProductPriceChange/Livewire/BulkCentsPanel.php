@@ -16,6 +16,7 @@ class BulkCentsPanel extends Component
     public int $cents = 25;
 
     public ?ProductPriceChangeOperation $operation = null;
+    public ?string $operationUuid = null;
 
 
     #[Reactive]
@@ -107,28 +108,20 @@ class BulkCentsPanel extends Component
         ProductPriceChangeJob::dispatch(
             $product->id,
             1,
-            $this->operation->id,
+            $this->operation->uuid,
             true, // force fail
         );
     }
     public function retryFailed(): void
     {
-        $uuid = DB::table('failed_jobs')
+        dd($this->operation);
+        $uuids = DB::table('failed_jobs')
             ->where('payload', 'like', '%"operationUuid":"' . $this->operation->uuid . '"%')
             ->pluck('uuid');
 
-        if ($uuid) {
+        foreach ($uuids as $uuid) {
             Artisan::call('queue:retry', ['id' => $uuid]);
         }
-        /*
-        $failedJobs = DB::table('failed_jobs')
-            ->where('payload', 'like', '%"operationId":' . $this->operation?->id . '%')
-            ->pluck('uuid');
-
-        foreach ($failedJobs as $uuid) {
-            Artisan::call('queue:retry', ['id' => $uuid]);
-        }
-        */
     }
     public function getRecentOperationsProperty()
     {
