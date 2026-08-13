@@ -64,14 +64,8 @@
         @endif
 
 
-        <div class="accordion accordion-flush" id="accordionTestFailure">
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="flush-headingOne">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-                        Обработка ошибок
-                    </button>
-                </h2>
-                <div id="flush-collapseOne" class="accordion-collapse " aria-labelledby="flush-headingOne" data-bs-parent="#accordionTestFailure">
+
+
                     <div class="accordion-body">
                         <div>
 
@@ -101,7 +95,7 @@
                                 @endif
                             </button>
 
-                            Failed: {{ $operation?->failed ?? 0 }}<br>
+                            <br>
                             Failed jobs: {{ $this->failedJobsCount }}
                         </div>
 
@@ -110,21 +104,22 @@
 
                             @foreach($this->recentOperations as $op)
                                 <div class="d-flex justify-content-between small py-1 border-bottom">
-                                    <span>#{{ $op->id }}</span>
-
+                                    <span>{{ $op->updated_at }}</span>
                                     <span>
                                         {{ $op->processed }}/{{ $op->total }}
                                     </span>
 
-                                    <span class="{{ $op->completed ? 'text-success' : 'text-warning' }}">
-                                        {{ $op->completed ? 'DONE' : 'RUNNING' }}
-                                    </span>
+                                    @if($op->completed && $op->processed === $op->total)
+                                        <span class="text-success">DONE</span>
+                                    @elseif($op->completed)
+                                        <span class="text-danger">FAILED</span>
+                                    @else
+                                        <span class="text-warning">RUNNING</span>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>

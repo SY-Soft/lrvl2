@@ -3,6 +3,7 @@
 namespace App\Livewire\Modules\ProductPriceChange\Livewire;
 
 use App\Models\Product;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use App\Jobs\ProductPriceChangeJob;
 use App\Models\ProductPriceChangeOperation;
@@ -38,18 +39,19 @@ class BulkCentsPanel extends Component
 
         $ids = $query->pluck('id');
 
+
         $this->operation = ProductPriceChangeOperation::create([
+            'uuid' => (string) Str::uuid(),
             'cents' => $this->cents,
             'total' => $ids->count(),
             'processed' => 0,
             'completed' => false,
         ]);
-
         foreach ($ids as $id) {
             ProductPriceChangeJob::dispatch(
                 $id,
                 $this->cents,
-                $this->operation->id,
+                $this->operation->uuid,
             );
         }
     }
@@ -111,6 +113,14 @@ class BulkCentsPanel extends Component
     }
     public function retryFailed(): void
     {
+        $uuid = DB::table('failed_jobs')
+            ->where('payload', 'like', '%"operationUuid":"' . $this->operation->uuid . '"%')
+            ->pluck('uuid');
+
+        if ($uuid) {
+            Artisan::call('queue:retry', ['id' => $uuid]);
+        }
+        /*
         $failedJobs = DB::table('failed_jobs')
             ->where('payload', 'like', '%"operationId":' . $this->operation?->id . '%')
             ->pluck('uuid');
@@ -118,6 +128,7 @@ class BulkCentsPanel extends Component
         foreach ($failedJobs as $uuid) {
             Artisan::call('queue:retry', ['id' => $uuid]);
         }
+        */
     }
     public function getRecentOperationsProperty()
     {
