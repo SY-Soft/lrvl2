@@ -12,10 +12,13 @@ class ProductPriceChangeJob implements ShouldQueue
 {
     use Queueable;
 
+
     public function __construct(
         public int $productId,
         public int $cents,
         public int $operationId,
+        public bool $forceFail = false,
+        public bool $isRetry = false,
     ) {}
 
     public function handle(): void
@@ -28,6 +31,10 @@ class ProductPriceChangeJob implements ShouldQueue
             'time' => now()->toDateTimeString(),
         ]);
 */
+        if ($this->forceFail) {
+            throw new \RuntimeException('Demo queue failure');
+        }
+
         $product = Product::find($this->productId);
 
         if (! $product) {
@@ -36,7 +43,7 @@ class ProductPriceChangeJob implements ShouldQueue
 
         sleep(2);
 
-        $whole = (int) $product->price;
+        $whole = floor((float) $product->price);
 
         $newPrice = $whole + ($this->cents / 100);
 
@@ -50,13 +57,26 @@ class ProductPriceChangeJob implements ShouldQueue
             $operation->increment('processed');
 
             $operation->refresh();
-
-            if ($operation->processed >= $operation->total) {
-                $operation->update([
-                    'completed' => true,
-                ]);
+            if (($operation->processed + $operation->failed) >= $operation->total) {
+                $operation->update(['completed' => true]);
             }
         }
     }
 
+
+    public function failed(?\Throwable $e): void
+    {
+        $operation = ProductPriceChangeOperation::find($this->operationId);
+
+        if (! $operation) {
+            return;
+        }
+        $operation->increment('failed');
+
+        $operation->refresh();
+
+        if (($operation->processed + $operation->failed) >= $operation->total) {
+            $operation->update(['completed' => true]);
+        }
+    }
 }
