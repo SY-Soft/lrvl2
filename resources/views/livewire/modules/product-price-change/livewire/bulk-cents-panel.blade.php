@@ -35,12 +35,11 @@
             >
                 @if($this->isRunning())
                     <span class="spinner-border spinner-border-sm me-1"></span>
-                    Выполняется...
+                    Подготавливается...
                 @else
                     Применить ко всем
                 @endif
             </button>
-
 <div>Выбранное значение (.00, .25, .50 или .75) будет установлено для всех товаров. Обработка выполняется в очереди в фоновом режиме, а прогресс и обновление цен отображаются на этой странице в реальном времени.</div>
         </div>
 
@@ -62,64 +61,6 @@
 
             </div>
         @endif
-
-
-
-
-                    <div class="accordion-body">
-                        <div>
-
-                            <button
-                                wire:click="testFailure"
-                                class="btn btn-danger btn-sm"
-                                @disabled($this->isRunning())
-                            >
-                                @if($this->isRunning())
-                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                    Выполняется...
-                                @else
-                                    Тест ошибки
-                                @endif
-                            </button>
-
-                            <button
-                                wire:click="retryFailed"
-                                class="btn btn-warning btn-sm"
-                                @disabled($this->isRunning())
-                            >
-                                @if($this->isRunning())
-                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                    Выполняется...
-                                @else
-                                    Retry failed
-                                @endif
-                            </button>
-
-                            <br>
-                            Failed jobs: {{ $this->failedJobsCount }}
-                        </div>
-
-                        <div class="mt-3 border-top pt-3">
-                            <div class="fw-semibold mb-2">Последние операции</div>
-
-                            @foreach($this->recentOperations as $op)
-                                <div class="d-flex justify-content-between small py-1 border-bottom">
-                                    <span>{{ $op->updated_at }}</span>
-                                    <span>
-                                        {{ $op->processed }}/{{ $op->total }}
-                                    </span>
-
-                                    @if($op->completed && $op->processed === $op->total)
-                                        <span class="text-success">DONE</span>
-                                    @elseif($op->completed)
-                                        <span class="text-danger">FAILED</span>
-                                    @else
-                                        <span class="text-warning">RUNNING</span>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
 
     </div>
 </div>

@@ -3,21 +3,16 @@
 namespace App\Livewire\Modules\ProductPriceChange\Livewire;
 
 use App\Models\Product;
-use Illuminate\Support\Str;
 use Livewire\Component;
 use App\Jobs\ProductPriceChangeJob;
 use App\Models\ProductPriceChangeOperation;
 use Livewire\Attributes\Reactive;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Artisan;
 
 class BulkCentsPanel extends Component
 {
     public int $cents = 25;
 
     public ?ProductPriceChangeOperation $operation = null;
-    public ?string $operationUuid = null;
-
 
     #[Reactive]
     public string $sort = 'name';
@@ -40,30 +35,25 @@ class BulkCentsPanel extends Component
 
         $ids = $query->pluck('id');
 
-
         $this->operation = ProductPriceChangeOperation::create([
-            'uuid' => (string) Str::uuid(),
             'cents' => $this->cents,
             'total' => $ids->count(),
             'processed' => 0,
             'completed' => false,
         ]);
+
         foreach ($ids as $id) {
             ProductPriceChangeJob::dispatch(
                 $id,
                 $this->cents,
-                $this->operation->uuid,
+                $this->operation->id,
             );
         }
     }
 
     public function isRunning(): bool
     {
-        if (! $this->operation) {
-            return false;
-        }
-
-        return ! $this->operation->fresh()->completed;
+        return ProductPriceChangeOperation::where('completed', false)->exists();
     }
 
     public function getProgressProperty(): int
@@ -88,49 +78,5 @@ class BulkCentsPanel extends Component
         return view(
             'livewire.modules.product-price-change.livewire.bulk-cents-panel'
         );
-    }
-    public function testFailure()
-    {
-        $product = Product::query()->first();
-
-        if (! $product) {
-            return;
-        }
-
-        $this->operation = ProductPriceChangeOperation::create([
-            'uuid' => (string) Str::uuid(),
-            'cents' => $this->cents,
-            'total' => 5,
-            'processed' => 0,
-            'completed' => false,
-        ]);
-
-        ProductPriceChangeJob::dispatch(
-            $product->id,
-            1,
-            $this->operation->uuid,
-            true, // force fail
-        );
-    }
-    public function retryFailed(): void
-    {
-        dd($this->operation);
-        $uuids = DB::table('failed_jobs')
-            ->where('payload', 'like', '%"operationUuid":"' . $this->operation->uuid . '"%')
-            ->pluck('uuid');
-
-        foreach ($uuids as $uuid) {
-            Artisan::call('queue:retry', ['id' => $uuid]);
-        }
-    }
-    public function getRecentOperationsProperty()
-    {
-        return ProductPriceChangeOperation::latest()
-            ->limit(10)
-            ->get();
-    }
-    public function getFailedJobsCountProperty(): int
-    {
-        return DB::table('failed_jobs')->count();
     }
 }
