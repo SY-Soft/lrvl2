@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Modules\ProductPriceChange\Livewire;
 
-use App\Models\Product;
-use Livewire\Component;
 use App\Jobs\ProductPriceChangeJob;
+use App\Models\Product;
 use App\Models\ProductPriceChangeOperation;
+use App\Models\ProductPriceChangeOperationItem;
 use Livewire\Attributes\Reactive;
+use Livewire\Component;
 
 class BulkCentsPanel extends Component
 {
@@ -17,13 +18,13 @@ class BulkCentsPanel extends Component
     #[Reactive]
     public string $sort = 'name';
 
-    public function apply()
+    public function apply(): void
     {
         if ($this->isRunning()) {
             return;
         }
 
-        $query = Product::query()->select('id');
+        $query = Product::query();
 
         match ($this->sort) {
             'name' => $query->orderBy('name'),
@@ -33,27 +34,57 @@ class BulkCentsPanel extends Component
             default => $query->orderBy('name'),
         };
 
-        $ids = $query->pluck('id');
+        $products = $query->get();
 
         $this->operation = ProductPriceChangeOperation::create([
             'cents' => $this->cents,
-            'total' => $ids->count(),
+            'total' => $products->count(),
             'processed' => 0,
+            'failed' => 0,
+            'errors_to_create' => 0,
             'completed' => false,
         ]);
 
-        foreach ($ids as $id) {
+        foreach ($products as $product) {
+            $item = ProductPriceChangeOperationItem::create([
+                'operation_id' => $this->operation->id,
+                'product_id' => $product->id,
+                'status' => 'pending',
+                'force_fail' => false,
+            ]);
+
             ProductPriceChangeJob::dispatch(
-                $id,
+                $item->id,
                 $this->cents,
-                $this->operation->id,
             );
         }
     }
 
+    public function createError(): void
+    {
+        if (! $this->operation || ! $this->isRunning()) {
+            return;
+        }
+
+        /*
+         * Каждое нажатие создаёт одну заявку
+         * на будущую ошибку.
+         */
+        $this->operation->increment('errors_to_create');
+
+        $this->operation->refresh();
+    }
+
     public function isRunning(): bool
     {
-        return ProductPriceChangeOperation::where('completed', false)->exists();
+        if (! $this->operation) {
+            return ProductPriceChangeOperation::where(
+                'completed',
+                false
+            )->exists();
+        }
+
+        return ! $this->operation->fresh()?->completed;
     }
 
     public function getProgressProperty(): int
@@ -68,9 +99,25 @@ class BulkCentsPanel extends Component
             return 0;
         }
 
+        $done = $operation->processed + $operation->failed;
+
         return (int) round(
-            $operation->processed / $operation->total * 100
+            $done / $operation->total * 100
         );
+    }
+
+    public function getFailedItemsProperty()
+    {
+        if (! $this->operation) {
+            return collect();
+        }
+
+        return ProductPriceChangeOperationItem::query()
+            ->with('product:id,name')
+            ->where('operation_id', $this->operation->id)
+            ->where('status', 'failed')
+            ->orderBy('id')
+            ->get();
     }
 
     public function render()

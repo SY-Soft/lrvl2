@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Products;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductPriceChangeOperationItem;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class Index extends Component
 {
@@ -21,6 +22,7 @@ class Index extends Component
         'category_id' => ['except' => ''],
         'sort' => ['except' => 'name'],
     ];
+
     protected $paginationTheme = 'bootstrap';
 
     public function render()
@@ -31,21 +33,41 @@ class Index extends Component
                 $q->where('name', 'like', "%{$this->search}%")
                     ->orWhere('description', 'like', "%{$this->search}%");
             })
-            ->when($this->category_id, fn($q) => $q->where('category_id', $this->category_id))
-            ->when($this->sort === 'price_asc', fn($q) => $q->orderBy('price'))
-            ->when($this->sort === 'price_desc', fn($q) => $q->orderBy('price', 'desc'))
-            ->when($this->sort === 'name', fn($q) => $q->orderBy('name'))
+            ->when(
+                $this->category_id,
+                fn($q) => $q->where('category_id', $this->category_id)
+            )
+            ->when(
+                $this->sort === 'price_asc',
+                fn($q) => $q->orderBy('price')
+            )
+            ->when(
+                $this->sort === 'price_desc',
+                fn($q) => $q->orderBy('price', 'desc')
+            )
+            ->when(
+                $this->sort === 'name',
+                fn($q) => $q->orderBy('name')
+            )
             ->paginate(12);
+
+        $failedProductIds = ProductPriceChangeOperationItem::query()
+            ->where('status', 'failed')
+            ->where('updated_at', '>', now()->subMinute())
+            ->pluck('product_id')
+            ->toArray();
 
         $categories = Category::orderBy('name')->get();
 
         return view('livewire.products.index', [
             'products' => $products,
             'categories' => $categories,
-            ])
+            'failedProductIds' => $failedProductIds,
+        ])
             ->layout('layouts.app')
             ->title(__('Товары'));
     }
+
     public function resetFilters()
     {
         $this->search = '';
@@ -53,9 +75,21 @@ class Index extends Component
         $this->sort = 'name';
         $this->resetPage();
     }
-    public function updatedSearch() { $this->resetPage(); }
-    public function updatedCategoryId() { $this->resetPage(); }
-    public function updatedSort() { $this->resetPage(); }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedCategoryId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSort()
+    {
+        $this->resetPage();
+    }
 
     #[On('prices-updated')]
     public function refreshProducts(): void
