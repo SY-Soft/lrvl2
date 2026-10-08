@@ -16,7 +16,7 @@ class ProductPriceChangeJob implements ShouldQueue
     public function __construct(
         public int $productId,
         public int $cents,
-        public string $operationUuid,
+        public string $operationId,
         public bool $forceFail = false,
         public bool $isRetry = false,
     ) {}
@@ -51,7 +51,13 @@ class ProductPriceChangeJob implements ShouldQueue
             'price' => $newPrice,
         ]);
 
-        $operation = ProductPriceChangeOperation::where('uuid', $this->operationUuid)->first();
+        $operation = ProductPriceChangeOperation::where('id', $this->operationId)->first();
+        Log::info('WATCHDOG', [
+            'operation' => $operation?->id,
+            'processed' => $operation?->processed,
+            'failed' => $operation?->failed,
+            'total' => $operation?->total,
+        ]);
 
         if ($operation) {
             $operation->increment('processed');
@@ -61,12 +67,13 @@ class ProductPriceChangeJob implements ShouldQueue
                 $operation->update(['completed' => true]);
             }
         }
+
     }
 
 
     public function failed(?\Throwable $e): void
     {
-        $operation = ProductPriceChangeOperation::where('uuid', $this->operationUuid)->first();
+        $operation = ProductPriceChangeOperation::where('id', $this->operationId)->first();
 
         if (! $operation) {
             return;

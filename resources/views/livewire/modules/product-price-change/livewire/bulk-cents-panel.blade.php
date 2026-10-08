@@ -35,7 +35,7 @@
             >
                 @if($this->isRunning())
                     <span class="spinner-border spinner-border-sm me-1"></span>
-                    Подготавливается...
+                    Выполняется...
                 @else
                     Применить ко всем
                 @endif
