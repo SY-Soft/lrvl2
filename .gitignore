@@ -37,3 +37,6 @@ Thumbs.db
 /structure.txt
 /.2del_Redis
 /.2del_Queues
+/storage
+/storage/
+/storage/*
